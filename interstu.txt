@@ -1,0 +1,342 @@
+
+R version 3.1.2 (2014-10-31) -- “Pumpkin Helmet”
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[R.app GUI 1.63 (6660) x86_64-apple-darwin10.8.0]
+
+[History restored from /Users/Martinp/.Rapp.history]
+
+> library(ggplot)
+Error in library(ggplot) : there is no package called ‘ggplot’
+> library(ggplot2)
+> intl = read.csv("intl.csv")
+> str(intl)
+'data.frame':	8 obs. of  2 variables:
+ $ Region       : Factor w/ 8 levels "Africa","Asia",..: 2 3 6 4 5 1 7 8
+ $ PercentOfIntl: num  0.531 0.201 0.098 0.09 0.054 0.02 0.015 0.002
+> ggplot(intl, aes(x=Region, y=PercentOfIntl)) + geom_bar(stat="identity") + geom_text(aes(label=PercentOfIntl))
+> intl = transfor(intl, Region = reorder(Region, -PercentOfIntl))
+Error: could not find function "transfor"
+> intl = transform(intl, Region = reorder(Region, -PercentOfIntl))
+> str(intl)
+'data.frame':	8 obs. of  2 variables:
+ $ Region       : Factor w/ 8 levels "Asia","Europe",..: 1 2 3 4 5 6 7 8
+  ..- attr(*, "scores")= num [1:8(1d)] -0.02 -0.531 -0.201 -0.09 -0.054 -0.098 -0.015 -0.002
+  .. ..- attr(*, "dimnames")=List of 1
+  .. .. ..$ : chr  "Africa" "Asia" "Europe" "Latin Am. & Caribbean" ...
+ $ PercentOfIntl: num  0.531 0.201 0.098 0.09 0.054 0.02 0.015 0.002
+> intl$PercentOfIntl = intl$PercentOfIntl * 100
+> ggplot(intl, aes(x=Region, y=PercentOfIntl)) + geom_bar(stat="identity", fill="dark blue") + geom_text(aes(label=PercentOfIntl), vjust=-0.4) + ylab("Percentage of Internation Students") + theme(axis.title.x = element_blank(), axis.text.x = element_text(angle = 45, hjust= 1))
+> library(ggmap)
+> intlall = read.csv("intlall.csv", stringAsFactors= FALSE)
+Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  unused argument (stringAsFactors = FALSE)
+> intlall = read.csv("intlall.csv", stringAsFactors=FALSE)
+Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  unused argument (stringAsFactors = FALSE)
+> intlall = read.csv("intlall.csv", stringsAsFactors=FALSE)
+> head(intlall)
+          Citizenship UG  G SpecialUG SpecialG ExhangeVisiting Total
+1             Albania  3  1         0        0               0     4
+2 Antigua and Barbuda NA NA        NA        1              NA     1
+3           Argentina NA 19        NA       NA              NA    19
+4             Armenia  3  2        NA       NA              NA     5
+5           Australia  6 32        NA       NA               1    39
+6             Austria NA 11        NA       NA               5    16
+> intlall[is.na(intlall)]=0
+> head(intlall)
+          Citizenship UG  G SpecialUG SpecialG ExhangeVisiting Total
+1             Albania  3  1         0        0               0     4
+2 Antigua and Barbuda  0  0         0        1               0     1
+3           Argentina  0 19         0        0               0    19
+4             Armenia  3  2         0        0               0     5
+5           Australia  6 32         0        0               1    39
+6             Austria  0 11         0        0               5    16
+> world_map = map_data("world")
+> str(world_map)
+'data.frame':	25553 obs. of  6 variables:
+ $ long     : num  -133 -132 -132 -132 -130 ...
+ $ lat      : num  58.4 57.2 57 56.7 56.1 ...
+ $ group    : num  1 1 1 1 1 1 1 1 1 1 ...
+ $ order    : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ region   : chr  "Canada" "Canada" "Canada" "Canada" ...
+ $ subregion: chr  NA NA NA NA ...
+> world_map = merge(world_map, intlall, by.x="region", by.y="Citizenship")
+> str(world_map)
+'data.frame':	13583 obs. of  12 variables:
+ $ region         : chr  "Albania" "Albania" "Albania" "Albania" ...
+ $ long           : num  20 21 20.5 20.7 19.5 ...
+ $ lat            : num  39.7 40.7 41.2 40.3 41.6 ...
+ $ group          : num  80 80 80 80 80 80 80 80 80 80 ...
+ $ order          : int  8481 8485 8487 8484 8496 8483 8497 8482 8498 8492 ...
+ $ subregion      : chr  NA NA NA NA ...
+ $ UG             : num  3 3 3 3 3 3 3 3 3 3 ...
+ $ G              : num  1 1 1 1 1 1 1 1 1 1 ...
+ $ SpecialUG      : num  0 0 0 0 0 0 0 0 0 0 ...
+ $ SpecialG       : num  0 0 0 0 0 0 0 0 0 0 ...
+ $ ExhangeVisiting: num  0 0 0 0 0 0 0 0 0 0 ...
+ $ Total          : int  4 4 4 4 4 4 4 4 4 4 ...
+> ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(fill="white", color="black") + coord_map("mercator")
+> world_map = world_map[order(world_map$group, world_map$order),]
+> ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(fill="white", color="black") + coord_map("mercator")
+> table(intlall$Citizenship)
+
+                     Albania          Antigua and Barbuda                    Argentina 
+                           1                            1                            1 
+                     Armenia                    Australia                      Austria 
+                           1                            1                            1 
+                     Bahrain                   Bangladesh                      Belarus 
+                           1                            1                            1 
+                     Belgium                      Bolivia           Bosnia-Hercegovina 
+                           1                            1                            1 
+                      Brazil                     Bulgaria                     Cambodia 
+                           1                            1                            1 
+                    Cameroon                       Canada                        Chile 
+                           1                            1                            1 
+China (People's Republic Of)                     Colombia                   Costa Rica 
+                           1                            1                            1 
+               Cote d'Ivoire                      Croatia                       Cyprus 
+                           1                            1                            1 
+              Czech Republic                      Denmark                      Ecuador 
+                           1                            1                            1 
+                       Egypt                  El Salvador                      Estonia 
+                           1                            1                            1 
+                    Ethiopia                      Finland                       France 
+                           1                            1                            1 
+                     Georgia                      Germany                        Ghana 
+                           1                            1                            1 
+                      Greece                    Guatemala                        Haiti 
+                           1                            1                            1 
+                   Hong Kong                      Hungary                      Iceland 
+                           1                            1                            1 
+                       India                    Indonesia                         Iran 
+                           1                            1                            1 
+                        Iraq                      Ireland                       Israel 
+                           1                            1                            1 
+                       Italy                      Jamaica                        Japan 
+                           1                            1                            1 
+                      Jordan                   Kazakhstan                        Kenya 
+                           1                            1                            1 
+                Korea, South                       Kuwait                       Latvia 
+                           1                            1                            1 
+                     Lebanon                    Lithuania                    Macedonia 
+                           1                            1                            1 
+                    Malaysia                    Mauritius                       Mexico 
+                           1                            1                            1 
+                     Moldova                     Mongolia                   Montenegro 
+                           1                            1                            1 
+                     Morocco                        Nepal                  Netherlands 
+                           1                            1                            1 
+                 New Zealand                      Nigeria                       Norway 
+                           1                            1                            1 
+                    Pakistan                     Paraguay                         Peru 
+                           1                            1                            1 
+                 Philippines                       Poland                     Portugal 
+                           1                            1                            1 
+                       Qatar                      Romania                       Russia 
+                           1                            1                            1 
+                      Rwanda                 Saudi Arabia                       Serbia 
+                           1                            1                            1 
+                Sierra Leone                    Singapore                     Slovakia 
+                           1                            1                            1 
+                     Somalia                 South Africa                        Spain 
+                           1                            1                            1 
+                   Sri Lanka                    St. Lucia St. Vincent & The Grenadines 
+                           1                            1                            1 
+                       Sudan                       Sweden                  Switzerland 
+                           1                            1                            1 
+                       Syria                       Taiwan                     Tanzania 
+                           1                            1                            1 
+                    Thailand            Trinidad & Tobago                      Tunisia 
+                           1                            1                            1 
+                      Turkey                       Uganda                      Ukraine 
+                           1                            1                            1 
+        United Arab Emirates               United Kingdom                      Unknown 
+                           1                            1                            1 
+                     Uruguay                    Venezuela                      Vietnam 
+                           1                            1                            1 
+                   West Bank                       Zambia                     Zimbabwe 
+                           1                            1                            1 
+> intlall$Citizenship[intlall$Citizenship=="China(People's Republic Of)"] ="China"
+> table(intlall$Citizenship)
+
+                     Albania          Antigua and Barbuda                    Argentina 
+                           1                            1                            1 
+                     Armenia                    Australia                      Austria 
+                           1                            1                            1 
+                     Bahrain                   Bangladesh                      Belarus 
+                           1                            1                            1 
+                     Belgium                      Bolivia           Bosnia-Hercegovina 
+                           1                            1                            1 
+                      Brazil                     Bulgaria                     Cambodia 
+                           1                            1                            1 
+                    Cameroon                       Canada                        Chile 
+                           1                            1                            1 
+China (People's Republic Of)                     Colombia                   Costa Rica 
+                           1                            1                            1 
+               Cote d'Ivoire                      Croatia                       Cyprus 
+                           1                            1                            1 
+              Czech Republic                      Denmark                      Ecuador 
+                           1                            1                            1 
+                       Egypt                  El Salvador                      Estonia 
+                           1                            1                            1 
+                    Ethiopia                      Finland                       France 
+                           1                            1                            1 
+                     Georgia                      Germany                        Ghana 
+                           1                            1                            1 
+                      Greece                    Guatemala                        Haiti 
+                           1                            1                            1 
+                   Hong Kong                      Hungary                      Iceland 
+                           1                            1                            1 
+                       India                    Indonesia                         Iran 
+                           1                            1                            1 
+                        Iraq                      Ireland                       Israel 
+                           1                            1                            1 
+                       Italy                      Jamaica                        Japan 
+                           1                            1                            1 
+                      Jordan                   Kazakhstan                        Kenya 
+                           1                            1                            1 
+                Korea, South                       Kuwait                       Latvia 
+                           1                            1                            1 
+                     Lebanon                    Lithuania                    Macedonia 
+                           1                            1                            1 
+                    Malaysia                    Mauritius                       Mexico 
+                           1                            1                            1 
+                     Moldova                     Mongolia                   Montenegro 
+                           1                            1                            1 
+                     Morocco                        Nepal                  Netherlands 
+                           1                            1                            1 
+                 New Zealand                      Nigeria                       Norway 
+                           1                            1                            1 
+                    Pakistan                     Paraguay                         Peru 
+                           1                            1                            1 
+                 Philippines                       Poland                     Portugal 
+                           1                            1                            1 
+                       Qatar                      Romania                       Russia 
+                           1                            1                            1 
+                      Rwanda                 Saudi Arabia                       Serbia 
+                           1                            1                            1 
+                Sierra Leone                    Singapore                     Slovakia 
+                           1                            1                            1 
+                     Somalia                 South Africa                        Spain 
+                           1                            1                            1 
+                   Sri Lanka                    St. Lucia St. Vincent & The Grenadines 
+                           1                            1                            1 
+                       Sudan                       Sweden                  Switzerland 
+                           1                            1                            1 
+                       Syria                       Taiwan                     Tanzania 
+                           1                            1                            1 
+                    Thailand            Trinidad & Tobago                      Tunisia 
+                           1                            1                            1 
+                      Turkey                       Uganda                      Ukraine 
+                           1                            1                            1 
+        United Arab Emirates               United Kingdom                      Unknown 
+                           1                            1                            1 
+                     Uruguay                    Venezuela                      Vietnam 
+                           1                            1                            1 
+                   West Bank                       Zambia                     Zimbabwe 
+                           1                            1                            1 
+> intlall$Citizenship[intlall$Citizenship=="China (People's Republic Of)"] ="China"
+> table(intlall$Citizenship)
+
+                     Albania          Antigua and Barbuda                    Argentina 
+                           1                            1                            1 
+                     Armenia                    Australia                      Austria 
+                           1                            1                            1 
+                     Bahrain                   Bangladesh                      Belarus 
+                           1                            1                            1 
+                     Belgium                      Bolivia           Bosnia-Hercegovina 
+                           1                            1                            1 
+                      Brazil                     Bulgaria                     Cambodia 
+                           1                            1                            1 
+                    Cameroon                       Canada                        Chile 
+                           1                            1                            1 
+                       China                     Colombia                   Costa Rica 
+                           1                            1                            1 
+               Cote d'Ivoire                      Croatia                       Cyprus 
+                           1                            1                            1 
+              Czech Republic                      Denmark                      Ecuador 
+                           1                            1                            1 
+                       Egypt                  El Salvador                      Estonia 
+                           1                            1                            1 
+                    Ethiopia                      Finland                       France 
+                           1                            1                            1 
+                     Georgia                      Germany                        Ghana 
+                           1                            1                            1 
+                      Greece                    Guatemala                        Haiti 
+                           1                            1                            1 
+                   Hong Kong                      Hungary                      Iceland 
+                           1                            1                            1 
+                       India                    Indonesia                         Iran 
+                           1                            1                            1 
+                        Iraq                      Ireland                       Israel 
+                           1                            1                            1 
+                       Italy                      Jamaica                        Japan 
+                           1                            1                            1 
+                      Jordan                   Kazakhstan                        Kenya 
+                           1                            1                            1 
+                Korea, South                       Kuwait                       Latvia 
+                           1                            1                            1 
+                     Lebanon                    Lithuania                    Macedonia 
+                           1                            1                            1 
+                    Malaysia                    Mauritius                       Mexico 
+                           1                            1                            1 
+                     Moldova                     Mongolia                   Montenegro 
+                           1                            1                            1 
+                     Morocco                        Nepal                  Netherlands 
+                           1                            1                            1 
+                 New Zealand                      Nigeria                       Norway 
+                           1                            1                            1 
+                    Pakistan                     Paraguay                         Peru 
+                           1                            1                            1 
+                 Philippines                       Poland                     Portugal 
+                           1                            1                            1 
+                       Qatar                      Romania                       Russia 
+                           1                            1                            1 
+                      Rwanda                 Saudi Arabia                       Serbia 
+                           1                            1                            1 
+                Sierra Leone                    Singapore                     Slovakia 
+                           1                            1                            1 
+                     Somalia                 South Africa                        Spain 
+                           1                            1                            1 
+                   Sri Lanka                    St. Lucia St. Vincent & The Grenadines 
+                           1                            1                            1 
+                       Sudan                       Sweden                  Switzerland 
+                           1                            1                            1 
+                       Syria                       Taiwan                     Tanzania 
+                           1                            1                            1 
+                    Thailand            Trinidad & Tobago                      Tunisia 
+                           1                            1                            1 
+                      Turkey                       Uganda                      Ukraine 
+                           1                            1                            1 
+        United Arab Emirates               United Kingdom                      Unknown 
+                           1                            1                            1 
+                     Uruguay                    Venezuela                      Vietnam 
+                           1                            1                            1 
+                   West Bank                       Zambia                     Zimbabwe 
+                           1                            1                            1 
+> world_map = merge(map_data("world"), intlall, by.x="region", by.y="citizenship")
+Error in fix.by(by.y, y) : 'by' must specify a uniquely valid column
+> world_map = merge(map_data("world"), intlall, by.x="region", by.y="Citizenship")
+> world_map = world_map[order(world_map$group, world_map$order),]
+> ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(fill=Total), color="black") + coord_map("mercator")
+Error: unexpected ',' in "ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(fill=Total),"
+> ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(aes(fill=Total), color="black") + coord_map("mercator")
+> ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(aes(fill=Total), color="black") + coord_map("ortho", orientation=c(20,30,0))
+> ggplot(world_map, aes(x=long, y=lat, group=group)) + geom_polygon(aes(fill=Total), color="black") + coord_map("ortho", orientation=c(-37,175,0))
+> 

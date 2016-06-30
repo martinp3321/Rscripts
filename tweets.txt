@@ -1,0 +1,203 @@
+
+R version 3.1.2 (2014-10-31) -- “Pumpkin Helmet”
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[R.app GUI 1.63 (6660) x86_64-apple-darwin10.8.0]
+
+[History restored from /Users/Martinp/.Rapp.history]
+
+> tweets = read.csv("tweets.csv", stringAsFactors=FALSE)
+Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  unused argument (stringAsFactors = FALSE)
+> tweets = read.csv("tweets.csv", stringsAsFactors=FALSE)
+> str(tweets)
+'data.frame':	1181 obs. of  2 variables:
+ $ Tweet: chr  "I have to say, Apple has by far the best customer care service I have ever received! @Apple @AppStore" "iOS 7 is so fricking smooth & beautiful!! #ThanxApple @Apple" "LOVE U @APPLE" "Thank you @apple, loving my new iPhone 5S!!!!!  #apple #iphone5S pic.twitter.com/XmHJCU4pcb" ...
+ $ Avg  : num  2 2 1.8 1.8 1.8 1.8 1.8 1.6 1.6 1.6 ...
+> tweets$Negative = as.factor(tweets$Avg <= -1)
+> table(tweets$Negative)
+
+FALSE  TRUE 
+  999   182 
+> install.packages("tm")
+--- Please select a CRAN mirror for use in this session ---
+also installing the dependency ‘slam’
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/slam_0.1-32.tgz'
+Content type 'application/x-gzip' length 95625 bytes (93 Kb)
+opened URL
+==================================================
+downloaded 93 Kb
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/tm_0.5-10.tgz'
+Content type 'application/x-gzip' length 659607 bytes (644 Kb)
+opened URL
+==================================================
+downloaded 644 Kb
+
+
+The downloaded binary packages are in
+	/var/folders/v1/tnqb6wns2wx0th5skv533b1c0000gn/T//RtmpM4tSyt/downloaded_packages
+> library(tm)
+> installpackages("SnowballC")
+Error: could not find function "installpackages"
+> install.packages("SnowballC")
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/SnowballC_0.5.tgz'
+Content type 'application/x-gzip' length 230249 bytes (224 Kb)
+opened URL
+==================================================
+downloaded 224 Kb
+
+
+The downloaded binary packages are in
+	/var/folders/v1/tnqb6wns2wx0th5skv533b1c0000gn/T//RtmpM4tSyt/downloaded_packages
+> library(SnowballC)
+> corpus = Corupus(VectorSource(tweets$Tweet))
+Error: could not find function "Corupus"
+> corpus = Corpus(VectorSource(tweets$Tweet))
+> corpus[[1]]
+I have to say, Apple has by far the best customer care service I have ever received! @Apple @AppStore
+> corpus = tm_map(corpus, tolower)
+> corpus[[1]]
+i have to say, apple has by far the best customer care service i have ever received! @apple @appstore
+> corpus = tm_map(corpus, removePunctuation)
+> corpus[[1]]
+i have to say apple has by far the best customer care service i have ever received apple appstore
+> stopword("english")[1:10]
+Error: could not find function "stopword"
+> stopwords("english")[1:10]
+ [1] "i"         "me"        "my"        "myself"    "we"        "our"       "ours"      "ourselves" "you"       "your"     
+> corpus = tm_map(corpus, removeWords, c("apple", stopwords("english")))
+> corpus[[1]]
+   say    far  best customer care service   ever received  appstore
+> corpus = tm_map(corpus, stemDocument)
+> corpus[[1]]
+   say    far  best custom care servic   ever receiv  appstor
+> frequencies = DocumentTermMatrix(corpus)
+> frequencies
+A document-term matrix (1181 documents, 3289 terms)
+
+Non-/sparse entries: 8980/3875329
+Sparsity           : 100%
+Maximal term length: 115 
+Weighting          : term frequency (tf)
+> inspect(frequencies[1000:10005,515:515])
+Error in `[.simple_triplet_matrix`(frequencies, 1000:10005, 515:515) : 
+  subscript out of bounds
+> inspect(frequencies[1000:1005,515:515])
+A document-term matrix (6 documents, 1 terms)
+
+Non-/sparse entries: 0/6
+Sparsity           : 100%
+Maximal term length: 8 
+Weighting          : term frequency (tf)
+
+      Terms
+Docs   children
+  1000        0
+  1001        0
+  1002        0
+  1003        0
+  1004        0
+  1005        0
+> inspect(frequencies[1000:1005,505:515])
+A document-term matrix (6 documents, 11 terms)
+
+Non-/sparse entries: 1/65
+Sparsity           : 98%
+Maximal term length: 9 
+Weighting          : term frequency (tf)
+
+      Terms
+Docs   cheapen cheaper check cheep cheer cheerio cherylcol chief chiiiiqu child children
+  1000       0       0     0     0     0       0         0     0        0     0        0
+  1001       0       0     0     0     0       0         0     0        0     0        0
+  1002       0       0     0     0     0       0         0     0        0     0        0
+  1003       0       0     0     0     0       0         0     0        0     0        0
+  1004       0       0     0     0     0       0         0     0        0     0        0
+  1005       0       0     0     0     1       0         0     0        0     0        0
+> findFreqTerms(frequencies, lowfreq=20)
+ [1] "android"              "anyon"                "app"                  "appl"                 "back"                 "batteri"              "better"               "buy"                 
+ [9] "can"                  "cant"                 "come"                 "dont"                 "fingerprint"          "freak"                "get"                  "googl"               
+[17] "ios7"                 "ipad"                 "iphon"                "iphone5"              "iphone5c"             "ipod"                 "ipodplayerpromo"      "itun"                
+[25] "just"                 "like"                 "lol"                  "look"                 "love"                 "make"                 "market"               "microsoft"           
+[33] "need"                 "new"                  "now"                  "one"                  "phone"                "pleas"                "promo"                "promoipodplayerpromo"
+[41] "realli"               "releas"               "samsung"              "say"                  "store"                "thank"                "think"                "time"                
+[49] "twitter"              "updat"                "use"                  "via"                  "want"                 "well"                 "will"                 "work"                
+> sparse = removeSparseTerms(frequencies, 0.995)
+> sparse
+A document-term matrix (1181 documents, 309 terms)
+
+Non-/sparse entries: 4669/360260
+Sparsity           : 99%
+Maximal term length: 20 
+Weighting          : term frequency (tf)
+> tweetsSparts = as.data.frame(as.matrix(sparse))
+> colnames(tweetsSparse) = make.names(colnames(colnames(tweetsSparse))
++ tweetsSparse$Negative = tweets$Negative
+Error: unexpected symbol in:
+"colnames(tweetsSparse) = make.names(colnames(colnames(tweetsSparse))
+tweetsSparse"
+> colnames(tweetsSparse) = make.names(colnames(tweetsSparse))
+Error in is.data.frame(x) : object 'tweetsSparse' not found
+> tweetsSparse = as.data.frame(as.matrix(sparse))
+> colnames(tweetsSparse) = make.names(colnames(tweetsSparse))
+> tweetsSparse$Negative = tweets$Negative
+> library(caTools)
+> set.seed(123)
+> split = sample.split(tweetsSparse4Negative, SplitRation=0.7)
+Error in sample.split(tweetsSparse4Negative, SplitRation = 0.7) : 
+  unused argument (SplitRation = 0.7)
+> split = sample.split(tweetsSparse$Negative, SplitRation=0.7)
+Error in sample.split(tweetsSparse$Negative, SplitRation = 0.7) : 
+  unused argument (SplitRation = 0.7)
+> split = sample.split(tweetsSparse$Negative, SplitRatio=0.7)
+> trainSparse = subset(tweetsSparse, split==TRUE)
+> testSparse = subset(tweetsSparse, split==FALSE)
+> library(rpart)
+> library(rpart.plot)
+> tweetCART =rpart(negative ~ ., data=trainSparse, method="class")
+Error in eval(expr, envir, enclos) : object 'negative' not found
+> tweetCART =rpart(Negative ~ ., data=trainSparse, method="class")
+> prp(tweetCART)
+> predictCART = predict(tweetCART, newdata=testSparse, type="class")
+> table(testSparse$Negative, predictCART)
+       predictCART
+        FALSE TRUE
+  FALSE   294    6
+  TRUE     37   18
+> (294+18)/(294+6+37+18)
+[1] 0.8788732
+> 300/(300+55)
+[1] 0.8450704
+> library(randomForest)
+randomForest 4.6-7
+Type rfNews() to see new features/changes/bug fixes.
+> set.seed(123)
+> tweetRF= randomForest(Negative ~ ., data=trainSparse)
+> predictRF = predict(tweetRF, newdata=testSparse)
+> table(testSparse$Negative, predictRF)
+       predictRF
+        FALSE TRUE
+  FALSE   293    7
+  TRUE     34   21
+> (293+21)/(293+7+34+21)
+[1] 0.884507
+> prp(tweetRF)
+Error: the object passed to prp is not an rpart object
+> 

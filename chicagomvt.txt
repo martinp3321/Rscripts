@@ -1,0 +1,173 @@
+
+R version 3.1.2 (2014-10-31) -- “Pumpkin Helmet”
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin10.8.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[R.app GUI 1.63 (6660) x86_64-apple-darwin10.8.0]
+
+[History restored from /Users/Martinp/.Rapp.history]
+
+> mvt = read.csv("mvt.csv", stringsAsFactors=FALSE)
+> str(mvt)
+'data.frame':	191641 obs. of  3 variables:
+ $ Date     : chr  "12/31/12 23:15" "12/31/12 22:00" "12/31/12 22:00" "12/31/12 22:00" ...
+ $ Latitude : num  41.8 41.9 42 41.8 41.8 ...
+ $ Longitude: num  -87.6 -87.7 -87.8 -87.7 -87.6 ...
+> mvt$Date = strptime(mvt$Date, format="%m/%d/%y %H:%M")
+> mvt$Weekday = weekdays(mvt$Date)
+> mvt$Hour = mvt$Date$hour
+> str(mvt)
+'data.frame':	191641 obs. of  5 variables:
+ $ Date     : POSIXlt, format: "2012-12-31 23:15:00" "2012-12-31 22:00:00" "2012-12-31 22:00:00" ...
+ $ Latitude : num  41.8 41.9 42 41.8 41.8 ...
+ $ Longitude: num  -87.6 -87.7 -87.8 -87.7 -87.6 ...
+ $ Weekday  : chr  "Monday" "Monday" "Monday" "Monday" ...
+ $ Hour     : int  23 22 22 22 21 20 20 20 19 18 ...
+> table(mvt$Weekday)
+
+   Friday    Monday  Saturday    Sunday  Thursday   Tuesday Wednesday 
+    29284     27397     27118     26316     27319     26791     27416 
+> WeekdayCounts = as.data.frame(table(mvt$Weekday))
+> str(WeekdayCounts)
+'data.frame':	7 obs. of  2 variables:
+ $ Var1: Factor w/ 7 levels "Friday","Monday",..: 1 2 3 4 5 6 7
+ $ Freq: int  29284 27397 27118 26316 27319 26791 27416
+> library(ggplot2)
+> ggplot(WeekdayCounts, aes(x = Var1, y = Freq)) + geom_line(aes(group=1))
+> WeekdayCounts$Var1 = factor(WeekdayCounts$Var1, ordered=TRUE, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+> ggplot(WeekdayCounts, aes(x = Var1, y = Freq)) + geom_line(aes(group=1))
+> ggplot(WeekdayCounts, aes(x = Var1, y = Freq)) + geom_line(aes(group=1)) + xlab("Day of the Week") + ylab("Total Motor Vehicle Thefts")
+> table(mvt$Weekday, mvt$Hour)
+           
+               0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16
+  Friday    1873  932  743  560  473  602  839 1203 1268 1286  938  822 1207  857  937 1140 1165
+  Monday    1900  825  712  527  415  542  772 1123 1323 1235  971  737 1129  824  958 1059 1136
+  Saturday  2050 1267  985  836  652  508  541  650  858 1039  946  789 1204  767  963 1086 1055
+  Sunday    2028 1236 1019  838  607  461  478  483  615  864  884  787 1192  789  959 1037 1083
+  Thursday  1856  816  696  508  400  534  799 1135 1298 1301  932  731 1093  752  831 1044 1131
+  Tuesday   1691  777  603  464  414  520  845 1118 1175 1174  948  786 1108  762  908 1071 1090
+  Wednesday 1814  790  619  469  396  561  862 1140 1329 1237  947  763 1225  804  863 1075 1076
+           
+              17   18   19   20   21   22   23
+  Friday    1318 1623 1652 1736 1881 2308 1921
+  Monday    1252 1518 1503 1622 1815 2009 1490
+  Saturday  1084 1348 1390 1570 1702 2078 1750
+  Sunday    1160 1389 1342 1706 1696 2079 1584
+  Thursday  1258 1510 1537 1668 1776 2134 1579
+  Tuesday   1274 1553 1496 1696 1816 2044 1458
+  Wednesday 1289 1580 1507 1718 1748 2093 1511
+> DayHourCounts = as.data.frame(table(mvt$Weekday, mvt$Hour))
+> str(DayHourCounts)
+'data.frame':	168 obs. of  3 variables:
+ $ Var1: Factor w/ 7 levels "Friday","Monday",..: 1 2 3 4 5 6 7 1 2 3 ...
+ $ Var2: Factor w/ 24 levels "0","1","2","3",..: 1 1 1 1 1 1 1 2 2 2 ...
+ $ Freq: int  1873 1900 2050 2028 1856 1691 1814 932 825 1267 ...
+> DayHourCounts$Hour = as.numeric(as.character(DayHourCounts$Var2))
+> ggplot(DayHourCounts, aes(x = Hour, y = Freq)) + geom_line(aes(group=Var1)) 
+> ggplot(DayHourCounts, aes(x = Hour, y = Freq)) + geom_line(aes(group=Var1, color=Var1), size=2)
+> DayHourCounts$Var1 = factor(DayhourCounts$Var1, ordered=TRUE, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+Error in factor(DayhourCounts$Var1, ordered = TRUE, levels = c("Monday",  : 
+  object 'DayhourCounts' not found
+> DayHourCounts$Var1 = factor(DayHourCounts$Var1, ordered=TRUE, levels=c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+> ggplot(DayHourCounts, aes(x = Hour, y = Var1)) + geom_tile(aes(fill = Freq))
+> ggplot(DayHourCounts, aes(x = Hour, y = Var1)) + geom_tile(aes(fill = Freq)) + scale_fill_gradient(name="Total MV Theft") + theme(axis.title.y = element_blank())
+> ggplot(DayHourCounts, aes(x = Hour, y = Var1)) + geom_tile(aes(fill = Freq)) + scale_fill_gradient(name="Total MV Theft", low="white", high="red") + theme(axis.title.y = element_blank())
+> install.packages("maps")
+--- Please select a CRAN mirror for use in this session ---
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/maps_2.3-7.tgz'
+Content type 'application/x-gzip' length 2062027 bytes (2.0 Mb)
+opened URL
+==================================================
+downloaded 2.0 Mb
+
+
+The downloaded binary packages are in
+	/var/folders/v1/tnqb6wns2wx0th5skv533b1c0000gn/T//RtmpaHMD6d/downloaded_packages
+> install.packages("ggmap")
+also installing the dependencies ‘RJSONIO’, ‘RgoogleMaps’, ‘png’, ‘rjson’, ‘mapproj’
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/RJSONIO_1.2-0.2.tgz'
+Content type 'application/x-gzip' length 1213818 bytes (1.2 Mb)
+opened URL
+==================================================
+downloaded 1.2 Mb
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/RgoogleMaps_1.2.0.6.tgz'
+Content type 'application/x-gzip' length 722606 bytes (705 Kb)
+opened URL
+==================================================
+downloaded 705 Kb
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/png_0.1-7.tgz'
+Content type 'application/x-gzip' length 238278 bytes (232 Kb)
+opened URL
+==================================================
+downloaded 232 Kb
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/rjson_0.2.14.tgz'
+Content type 'application/x-gzip' length 134877 bytes (131 Kb)
+opened URL
+==================================================
+downloaded 131 Kb
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/mapproj_1.2-2.tgz'
+Content type 'application/x-gzip' length 68914 bytes (67 Kb)
+opened URL
+==================================================
+downloaded 67 Kb
+
+trying URL 'http://cran.cnr.Berkeley.edu/bin/macosx/contrib/3.0/ggmap_2.3.tgz'
+Content type 'application/x-gzip' length 4529699 bytes (4.3 Mb)
+opened URL
+==================================================
+downloaded 4.3 Mb
+
+
+The downloaded binary packages are in
+	/var/folders/v1/tnqb6wns2wx0th5skv533b1c0000gn/T//RtmpaHMD6d/downloaded_packages
+> library(maps)
+> library(ggmaps)
+Error in library(ggmaps) : there is no package called ‘ggmaps’
+> library(ggmap)
+> chicago = get_map(location = "chicago", zoom=11)
+Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=chicago&zoom=11&size=%20640x640&scale=%202&maptype=terrain&sensor=false
+Google Maps API Terms of Service : http://developers.google.com/maps/terms
+Information from URL : http://maps.googleapis.com/maps/api/geocode/json?address=chicago&sensor=false
+Google Maps API Terms of Service : http://developers.google.com/maps/terms
+> ggmap(chicago)
+> ggmap(chicago) + geom_point(data=mvt[1:100,],aes(x= Longitude, y= Latitude))
+Warning message:
+Removed 7 rows containing missing values (geom_point). 
+> LatLonCounts = as.data.frame(table(round(mvt$Longitude,2), round(mvt$Latitude,2)))
+> str(LatLonCounts)
+'data.frame':	1638 obs. of  3 variables:
+ $ Var1: Factor w/ 42 levels "-87.93","-87.92",..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ Var2: Factor w/ 39 levels "41.64","41.65",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ Freq: int  0 0 0 0 0 0 0 0 0 0 ...
+> LatLonCounts$Long = as.numeric(as.character(LatLonCounts$Var1))
+> LatLonCounts$Lat = as.numeric(as.character(LatLonCounts$Var2))
+> ggmap(chicago) + geom_point(data=LatLonCounts, aes(x=Long, y= Lat, color=Freq, size=Freq))
+Warning message:
+Removed 615 rows containing missing values (geom_point). 
+> ggmap(chicago) + geom_point(data=LatLonCounts, aes(x=Long, y= Lat, color=Freq, size=Freq)) + scale_color_gradient(low="yellow", high="red")
+Warning message:
+Removed 615 rows containing missing values (geom_point). 
+> ggmap(chicago) + geom_tile(data=LatLongCounts, aes(x= Long, y=Lat, alpha = Freq), fill="red")
+Error in do.call("layer", list(mapping = mapping, data = data, stat = stat,  : 
+  object 'LatLongCounts' not found
+> ggmap(chicago) + geom_tile(data=LatLonCounts, aes(x= Long, y=Lat, alpha = Freq), fill="red")
+> 
